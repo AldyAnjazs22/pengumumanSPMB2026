@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPDB & Profil Guru - SMAN 2 Mesuji</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <header class="bg-[#0f172a] text-white shadow-lg border-b-4 border-amber-500 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-4 text-center sm:text-left">
+                <div class="flex gap-2 bg-white p-1 rounded-xl shadow-inner">
+                    <img id="nav-logo-prov" src="" alt="Logo Provinsi" class="w-12 h-12 object-contain p-0.5">
+                    <img id="nav-logo-sekolah" src="" alt="Logo Sekolah" class="w-12 h-12 object-contain p-0.5 border-l border-slate-200">
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide">SMA NEGERI 2 MESUJI</h1>
+                    <p class="text-xs text-amber-400 font-medium">Penerimaan Peserta Didik Baru (PPDB) 2026/2027</p>
+                </div>
+            </div>
+            <nav class="flex flex-wrap gap-2 justify-center">
+                <button onclick="switchPage('home')" class="px-4 py-2 rounded-lg font-semibold text-sm transition bg-amber-500 text-slate-900 hover:bg-amber-400 shadow" id="btn-home">Beranda</button>
+                <button onclick="switchPage('guru')" class="px-4 py-2 rounded-lg font-semibold text-sm transition bg-slate-800 text-slate-200 hover:bg-slate-700 border border-slate-700" id="btn-guru">Daftar Guru</button>
+                <button onclick="switchPage('login')" class="px-4 py-2 rounded-lg font-semibold text-sm transition bg-slate-800 text-slate-200 hover:bg-slate-700 border border-slate-700" id="btn-admin-nav">Halaman Admin</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow container mx-auto px-4 py-8 max-w-5xl">
+        
+        <div id="page-home" class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-white rounded-2xl shadow-md p-6 border-t-4 border-[#1e3a8a]">
+                    <h2 class="text-2xl font-bold text-[#1e3a8a] mb-2 text-center">Cek Hasil Seleksi PPDB</h2>
+                    <p class="text-center text-slate-500 text-sm mb-6">Silakan masukkan Nomor Pendaftaran resmi Anda pada kolom di bawah ini untuk melihat hasil kelulusan.</p>
+                    
+                    <div id="search-container" class="max-w-md mx-auto flex flex-col sm:flex-row gap-2">
+                        <input type="text" id="search-input" placeholder="Contoh: PPDB-2026001" class="flex-grow px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] font-mono uppercase bg-white">
+                        <button id="search-btn" onclick="checkStatus()" class="bg-[#1e3a8a] hover:bg-[#1d4ed8] text-white font-bold px-6 py-3 rounded-lg transition shadow">
+                            Cek Status
+                        </button>
+                    </div>
+                </div>
+
+                <div id="result-box" class="hidden bg-white rounded-2xl shadow-md p-6 border transition-all duration-300"></div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-md p-6 border-t-4 border-amber-500 space-y-4">
+                <div class="text-center">
+                    <h3 class="font-bold text-slate-800 text-lg border-b pb-2 mb-4 uppercase tracking-wide text-[#1e3a8a]">Sambutan Kepala Sekolah</h3>
+                    <div class="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-slate-100 shadow-md mb-3">
+                        <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200&h=200" alt="Fadlilatun Marifah, S.Pd." class="w-full h-full object-cover">
+                    </div>
+                    <h4 class="font-bold text-slate-900 leading-tight">Fadlilatun Marifah, S.Pd.</h4>
+                    <p class="text-xs text-slate-500 font-medium">Kepala SMAN 2 Mesuji</p>
+                </div>
+                <div class="text-slate-600 text-xs leading-relaxed text-justify bg-slate-50 p-3 rounded-xl border border-slate-100 italic">
+                    "Selamat datang calon siswa-siswi terbaik bangsa di SMA Negeri 2 Mesuji. Selamat bagi anak-anakku yang dinyatakan lulus seleksi PPDB tahun ini. Segera lakukan pendaftaran ulang sesuai dengan jadwal yang ditentukan."
+                </div>
+            </div>
+        </div>
+
+
+        <section id="page-guru" class="hidden space-y-6">
+            <div class="text-center max-w-xl mx-auto mb-8">
+                <h2 class="text-3xl font-bold text-[#1e3a8a]">Dewan Guru & Staf Pengajar</h2>
+                <p class="text-sm text-slate-500 mt-2">Mengenal lebih dekat para tenaga pendidik profesional SMA Negeri 2 Mesuji.</p>
+            </div>
+            <div id="guru-grid-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
+        </section>
+
+
+        <section id="page-login" class="hidden max-w-md mx-auto pt-8">
+            <div class="bg-white rounded-2xl shadow-md p-6 border-t-4 border-[#0f172a]">
+                <h2 class="text-xl font-bold text-[#0f172a] mb-2 text-center">Login Dashboard Admin</h2>
+                <p class="text-xs text-center text-slate-500 mb-6">Gunakan akun admin terverifikasi untuk mengelola sistem.</p>
+                <form onsubmit="handleLogin(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Username</label>
+                        <input type="text" id="login-username" required placeholder="Contoh: Aldy" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#1e3a8a]">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Password</label>
+                        <input type="password" id="login-password" required placeholder="••••••••" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#1e3a8a]">
+                    </div>
+                    <button type="submit" class="w-full bg-[#1e3a8a] hover:bg-[#0f172a] text-white font-bold py-2.5 rounded-lg transition text-sm shadow">
+                        Masuk Sistem
+                    </button>
+                </form>
+            </div>
+        </section>
+
+
+        <section id="page-admin" class="hidden space-y-8">
+            
+            <div class="bg-white rounded-2xl shadow-md p-4 flex justify-between items-center border border-slate-200">
+                <p class="text-sm text-slate-600">Masuk sebagai Admin: <span class="font-bold text-blue-600">Aldy</span></p>
+                <div class="flex gap-2">
+                    <button onclick="resetSemuaData()" class="text-xs text-red-500 hover:underline px-2">Reset Semua Data Awal</button>
+                    <button onclick="handleLogout()" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow">Keluar (Logout)</button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-md p-6 border-t-4 border-amber-500">
+                <h2 class="text-xl font-bold text-slate-800 mb-2 flex items-center gap-2">⚙️ Pengaturan Kop Surat & Multi-Logo</h2>
+                <p class="text-xs text-slate-500 mb-4">Unggah Logo Provinsi (Kiri Kop) dan Logo Sekolah (Kanan Kop), serta sesuaikan teks instansi untuk cetakan PDF.</p>
+                
+                <form onsubmit="saveKopAndLogos(event)" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-amber-50/50 p-4 rounded-xl border border-amber-100">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">1. Upload Logo Provinsi (Kiri Surat)</label>
+                            <input type="file" id="logo-prov-input" accept="image/*" class="w-full text-xs text-slate-500 file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:bg-amber-600 file:text-white hover:file:bg-amber-700">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">2. Upload Logo Sekolah (Kanan Surat)</label>
+                            <input type="file" id="logo-sekolah-input" accept="image/*" class="w-full text-xs text-slate-500 file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:bg-amber-600 file:text-white hover:file:bg-amber-700">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Instansi Atas (Baris 1)</label>
+                            <input type="text" id="kop-line1" required class="w-full px-3 py-2 border rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Nama Sekolah (Baris 2)</label>
+                            <input type="text" id="kop-line2" required class="w-full px-3 py-2 border rounded-lg text-sm font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">Alamat & Kontak (Baris 3)</label>
+                            <input type="text" id="kop-line3" required class="w-full px-3 py-2 border rounded-lg text-sm">
+                        </div>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-6 py-2 rounded-lg text-sm transition shadow">
+                            Simpan Struktur Kop & Logo
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-md p-6 border-t-4 border-teal-600">
+                <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">👨‍🏫 Kelola Daftar Guru & Mata Pelajaran</h2>
+                
+                <form id="guru-form" onsubmit="saveGuru(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-xl mb-6 border">
+                    <input type="hidden" id="guru-idx">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Nama Lengkap & Gelar</label>
+                        <input type="text" id="guru-name" required placeholder="Contoh: Ahmad Subagja, M.Pd." class="w-full px-3 py-2 border rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Mata Pelajaran / Jabatan</label>
+                        <input type="text" id="guru-subject" required placeholder="Contoh: Matematika" class="w-full px-3 py-2 border rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Upload Foto Guru</label>
+                        <input type="file" id="guru-photo" accept="image/*" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100">
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit" id="guru-submit-btn" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 rounded-lg text-sm shadow">
+                            Simpan Data Guru
+                        </button>
+                    </div>
+                </form>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-800 text-white text-sm">
+                                <th class="p-3 border">Foto</th>
+                                <th class="p-3 border">Nama Lengkap Guru</th>
+                                <th class="p-3 border">Mata Pelajaran / Jabatan</th>
+                                <th class="p-3 border text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-guru-table" class="text-sm text-slate-700"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-md p-6 border-t-4 border-slate-700">
+                <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">🎓 Kelola Daftar Kelulusan Siswa</h2>
+                
+                <form id="student-form" onsubmit="saveStudent(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl mb-6 border">
+                    <input type="hidden" id="student-idx">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">No. Pendaftaran</label>
+                        <input type="text" id="form-reg" required placeholder="PPDB-2026001" class="w-full px-3 py-2 border rounded-lg uppercase font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Nama Lengkap Siswa</label>
+                        <input type="text" id="form-name" required placeholder="Nama Lengkap" class="w-full px-3 py-2 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Status Kelulusan</label>
+                        <div class="flex gap-2">
+                            <select id="form-status" class="w-full px-3 py-2 border rounded-lg">
+                                <option value="LULUS">LULUS</option>
+                                <option value="TIDAK LULUS">TIDAK LULUS</option>
+                            </select>
+                            <button type="submit" id="form-submit-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded-lg text-sm shrink-0 shadow">Simpan</button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-800 text-white text-sm">
+                                <th class="p-3 border">No. Pendaftaran</th>
+                                <th class="p-3 border">Nama Lengkap</th>
+                                <th class="p-3 border">Status</th>
+                                <th class="p-3 border text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-table-body" class="text-sm text-slate-700"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-[#0f172a] text-slate-400 text-center py-4 text-xs border-t border-slate-800 mt-auto">
+        <p>&copy; 2026 SMA Negeri 2 Mesuji. Kepala Sekolah: Fadlilatun Marifah, S.Pd.</p>
+    </footer>
+
+    <script>
+        // Kredensial Admin
+        const ADMIN_USER = "Aldy";
+        const ADMIN_PASS = "Smanda123";
+        let isAdminLoggedIn = false;
+
+        // Gambar Default Sistem (Placeholder)
+        const placeholderLogoProv = "https://via.placeholder.com/120x120/0f172a/ffffff?text=PROV";
+        const placeholderLogoSekolah = "https://via.placeholder.com/120x120/1e3a8a/ffffff?text=SEKOLAH";
+        const placeholderGuruImg = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200&h=200";
+
+        // Master Data Default
+        const defaultStudents = [
+            { reg: "PPDB-2026001", name: "Anisa Rahmawati", status: "LULUS" },
+            { reg: "PPDB-2026002", name: "Bambang Pamungkas", status: "LULUS" }
+        ];
+        const defaultGurus = [
+            { name: "Fadlilatun Marifah, S.Pd.", subject: "Kepala Sekolah", photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200&h=200" },
+            { name: "Ahmad Subagja, M.Pd.", subject: "Matematika / Waka Kurikulum", photo: placeholderGuruImg }
+        ];
+        const defaultKop = {
+            line1: "PEMERINTAH PROVINSI LAMPUNG\nDinas Pendidikan Dan Kebudayaan",
+            line2: "SMA NEGERI 2 MESUJI",
+            line3: "Alamat: Jl. Raya Lintas SMAN 2 Mesuji, Kabupaten Mesuji, Lampung."
+        };
+
+        // Memuat/Inisialisasi Sinkronisasi LocalStorage
+        let students = JSON.parse(localStorage.getItem('ppdb_students')) || defaultStudents;
+        let gurus = JSON.parse(localStorage.getItem('ppdb_gurus')) || defaultGurus;
+        let kopLetter = JSON.parse(localStorage.getItem('ppdb_kop')) || defaultKop;
+        let logoProv = localStorage.getItem('ppdb_logo_prov') || placeholderLogoProv;
+        let logoSekolah = localStorage.getItem('ppdb_logo_sekolah') || placeholderLogoSekolah;
+
+        if(!localStorage.getItem('ppdb_students')) localStorage.setItem('ppdb_students', JSON.stringify(students));
+        if(!localStorage.getItem('ppdb_gurus')) localStorage.setItem('ppdb_gurus', JSON.stringify(gurus));
+        if(!localStorage.getItem('ppdb_kop')) localStorage.setItem('ppdb_kop', JSON.stringify(kopLetter));
+        if(!localStorage.getItem('ppdb_logo_prov')) localStorage.setItem('ppdb_logo_prov', logoProv);
+        if(!localStorage.getItem('ppdb_logo_sekolah')) localStorage.setItem('ppdb_logo_sekolah', logoSekolah);
+
+        // Pasang Awal Logo di Navbar Utama
+        document.getElementById('nav-logo-prov').src = logoProv;
+        document.getElementById('nav-logo-sekolah').src = logoSekolah;
+
+        // Navigasi Tab Kontrol
+        function switchPage(page) {
+            const homePage = document.getElementById('page-home');
+            const guruPage = document.getElementById('page-guru');
+            const loginPage = document.getElementById('page-login');
+            const adminPage = document.getElementById('page-admin');
+            
+            const btnHome = document.getElementById('btn-home');
+            const btnGuru = document.getElementById('btn-guru');
+            const btnAdminNav = document.getElementById('btn-admin-nav');
+
+            homePage.classList.add('hidden'); guruPage.classList.add('hidden'); loginPage.classList.add('hidden'); adminPage.classList.add('hidden');
+            btnHome.className = btnGuru.className = btnAdminNav.className = "px-4 py-2 rounded-lg font-semibold text-sm transition bg-slate-800 text-slate-200 hover:bg-slate-700 border border-slate-700";
+
+            if (page === 'home') {
+                homePage.classList.remove('hidden'); btnHome.className = "px-4 py-2 rounded-lg font-semibold text-sm transition bg-amber-500 text-slate-900 hover:bg-amber-400 shadow";
+            } else if (page === 'guru') {
+                guruPage.classList.remove('hidden'); btnGuru.className = "px-4 py-2 rounded-lg font-semibold text-sm transition bg-amber-500 text-slate-900 hover:bg-amber-400 shadow";
+                renderGuruUserPage();
+            } else if (page === 'login') {
+                if (isAdminLoggedIn) { switchPage('admin'); return; }
+                loginPage.classList.remove('hidden'); btnAdminNav.className = "px-4 py-2 rounded-lg font-semibold text-sm transition bg-amber-500 text-slate-900 hover:bg-amber-400 shadow";
+            } else if (page === 'admin') {
+                if (!isAdminLoggedIn) { alert('Harap login dahulu!'); switchPage('login'); return; }
+                adminPage.classList.remove('hidden'); btnAdminNav.className = "px-4 py-2 rounded-lg font-semibold text-sm transition bg-amber-500 text-slate-900 hover:bg-amber-400 shadow";
+                
+                document.getElementById('kop-line1').value = kopLetter.line1;
+                document.getElementById('kop-line2').value = kopLetter.line2;
+                document.getElementById('kop-line3').value = kopLetter.line3;
+                
+                renderAdminTable(); renderAdminGuruTable();
+            }
+        }
+
+        function renderGuruUserPage() {
+            const container = document.getElementById('guru-grid-container'); container.innerHTML = '';
+            gurus.forEach(guru => {
+                container.innerHTML += `
+                    <div class="bg-white rounded-2xl shadow-md overflow-hidden border border-slate-200 hover:shadow-lg transition flex flex-col">
+                        <img src="${guru.photo}" alt="${guru.name}" class="w-full h-52 object-cover object-top bg-slate-100">
+                        <div class="p-4 text-center bg-gradient-to-t from-slate-50 to-white flex-grow flex flex-col justify-center">
+                            <h4 class="font-bold text-slate-900 leading-tight">${guru.name}</h4>
+                            <div class="mt-2"><span class="inline-block bg-[#1e3a8a]/10 text-[#1e3a8a] text-[11px] font-bold px-2.5 py-1 rounded-full">${guru.subject}</span></div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            if (document.getElementById('login-username').value === ADMIN_USER && document.getElementById('login-password').value === ADMIN_PASS) {
+                isAdminLoggedIn = true; alert('Login Berhasil!'); switchPage('admin');
+            } else { alert('Kredensial Salah!'); }
+        }
+        function handleLogout() { isAdminLoggedIn = false; switchPage('home'); }
+
+        // PROSES ASINKRONUS UNTUK MENYIMPAN MULTI-LOGO & TEKS KOP SURAT
+        async function saveKopAndLogos(e) {
+            e.preventDefault();
+            const fileProv = document.getElementById('logo-prov-input').files[0];
+            const fileSekolah = document.getElementById('logo-sekolah-input').files[0];
+
+            kopLetter = {
+                line1: document.getElementById('kop-line1').value.trim(),
+                line2: document.getElementById('kop-line2').value.trim(),
+                line3: document.getElementById('kop-line3').value.trim()
+            };
+            localStorage.setItem('ppdb_kop', JSON.stringify(kopLetter));
+
+            const convertBase64 = (file) => {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.readAsDataURL(file);
+                });
+            };
+
+            if (fileProv) {
+                logoProv = await convertBase64(fileProv);
+                localStorage.setItem('ppdb_logo_prov', logoProv);
+                document.getElementById('nav-logo-prov').src = logoProv;
+            }
+            if (fileSekolah) {
+                logoSekolah = await convertBase64(fileSekolah);
+                localStorage.setItem('ppdb_logo_sekolah', logoSekolah);
+                document.getElementById('nav-logo-sekolah').src = logoSekolah;
+            }
+
+            alert('Data Kop Surat dan Logo Provinsi & Sekolah Berhasil Diperbarui!');
+        }
+
+        /* --- LOGIK MANAJEMEN GURU --- */
+        function renderAdminGuruTable() {
+            const tbody = document.getElementById('admin-guru-table'); tbody.innerHTML = '';
+            gurus.forEach((guru, index) => {
+                tbody.innerHTML += `
+                    <tr class="border-b hover:bg-slate-50">
+                        <td class="p-2 border"><img src="${guru.photo}" class="w-12 h-12 object-cover rounded-full border"></td>
+                        <td class="p-3 border font-semibold">${guru.name}</td>
+                        <td class="p-3 border">${guru.subject}</td>
+                        <td class="p-3 border text-center space-x-2">
+                            <button onclick="editGuru(${index})" class="text-blue-600 font-bold text-xs">Edit</button>
+                            <button onclick="deleteGuru(${index})" class="text-red-600 font-bold text-xs">Hapus</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function saveGuru(e) {
+            e.preventDefault();
+            const idx = document.getElementById('guru-idx').value;
+            const name = document.getElementById('guru-name').value.trim();
+            const subject = document.getElementById('guru-subject').value.trim();
+            const photoFile = document.getElementById('guru-photo').files[0];
+
+            const prosesSimpanGuru = (photoUrl) => {
+                const dataGuru = { name, subject, photo: photoUrl || placeholderGuruImg };
+                if (idx === "") { gurus.push(dataGuru); } 
+                else { dataGuru.photo = photoUrl || gurus[idx].photo; gurus[idx] = dataGuru; }
+                localStorage.setItem('ppdb_gurus', JSON.stringify(gurus));
+                document.getElementById('guru-form').reset(); document.getElementById('guru-idx').value = "";
+                document.getElementById('guru-submit-btn').innerText = "Simpan Data Guru";
+                renderAdminGuruTable(); alert('Data guru berhasil disimpan!');
+            };
+
+            if (photoFile) {
+                const reader = new FileReader(); reader.onloadend = function () { prosesSimpanGuru(reader.result); }; reader.readAsDataURL(photoFile);
+            } else { prosesSimpanGuru(idx !== "" ? gurus[idx].photo : null); }
+        }
+
+        function editGuru(idx) {
+            const g = gurus[idx]; document.getElementById('guru-idx').value = idx;
+            document.getElementById('guru-name').value = g.name; document.getElementById('guru-subject').value = g.subject;
+            document.getElementById('guru-submit-btn').innerText = "Update Guru";
+        }
+        function deleteGuru(index) {
+            if (confirm('Hapus data guru?')) { gurus.splice(index, 1); localStorage.setItem('ppdb_gurus', JSON.stringify(gurus)); renderAdminGuruTable(); }
+        }
+
+        /* --- LOGIK MANAJEMEN SISWA --- */
+        function renderAdminTable() {
+            const tbody = document.getElementById('admin-table-body'); tbody.innerHTML = '';
+            students.forEach((student, index) => {
+                const sc = student.status === 'LULUS' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+                tbody.innerHTML += `
+                    <tr class="border-b hover:bg-slate-50">
+                        <td class="p-3 border font-mono font-bold">${student.reg}</td>
+                        <td class="p-3 border">${student.name}</td>
+                        <td class="p-3 border"><span class="px-2 py-1 rounded-md text-xs font-bold ${sc}">${student.status}</span></td>
+                        <td class="p-3 border text-center space-x-2">
+                            <button onclick="editStudent(${index})" class="text-blue-600 font-bold text-xs">Edit</button>
+                            <button onclick="deleteStudent(${index})" class="text-red-600 font-bold text-xs">Hapus</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function saveStudent(e) {
+            e.preventDefault();
+            const idx = document.getElementById('student-idx').value;
+            const reg = document.getElementById('form-reg').value.trim().toUpperCase();
+            const name = document.getElementById('form-name').value.trim();
+            const status = document.getElementById('form-status').value;
+
+            if (idx === "") {
+                if (students.some(s => s.reg === reg)) { alert('Nomor sudah terdaftar!'); return; }
+                students.push({ reg, name, status });
+            } else { students[idx] = { reg, name, status }; }
+            localStorage.setItem('ppdb_students', JSON.stringify(students));
+            document.getElementById('student-form').reset(); document.getElementById('student-idx').value = "";
+            renderAdminTable(); alert('Data siswa disimpan!');
+        }
+
+        function editStudent(idx) {
+            const s = students[idx]; document.getElementById('student-idx').value = idx;
+            document.getElementById('form-reg').value = s.reg; document.getElementById('form-name').value = s.name; document.getElementById('form-status').value = s.status;
+        }
+        function deleteStudent(index) {
+            if (confirm('Hapus data siswa?')) { students.splice(index, 1); localStorage.setItem('ppdb_students', JSON.stringify(students)); renderAdminTable(); }
+        }
+        function resetSemuaData() { if (confirm('Kembalikan semua data ke setelan awal pabrik?')) { localStorage.clear(); location.reload(); } }
+
+        // Fitur Cek Status Kelulusan
+        function checkStatus() {
+            const inputVal = document.getElementById('search-input').value.trim().toUpperCase();
+            const resultBox = document.getElementById('result-box');
+            if (!inputVal) { alert('Masukkan Nomor Pendaftaran!'); return; }
+            const student = students.find(s => s.reg.toUpperCase() === inputVal);
+            resultBox.classList.remove('hidden');
+
+            if (student) {
+                if (student.status === 'LULUS') {
+                    resultBox.className = "bg-green-50 border-2 border-green-500 rounded-2xl shadow-lg p-6 text-center space-y-4";
+                    resultBox.innerHTML = `
+                        <div class="inline-block bg-green-500 text-white text-xs font-bold uppercase px-3 py-1 rounded-full">Selamat! Anda Lulus</div>
+                        <h3 class="text-2xl font-bold text-slate-800">${student.name}</h3>
+                        <p class="text-green-700 text-sm">Anda dinyatakan LULUS seleksi PPDB di SMAN 2 Mesuji. Surat undangan resmi pendaftaran ulang sedang diunduh otomatis.</p>
+                        <button onclick="downloadPDF('${student.name}', '${student.reg}')" class="bg-[#1e3a8a] text-white text-xs font-bold py-2 px-4 rounded-lg shadow">📥 Unduh Kembali Surat Resmi</button>
+                    `;
+                    setTimeout(() => { downloadPDF(student.name, student.reg); }, 1000);
+                } else {
+                    resultBox.className = "bg-red-50 border-2 border-red-300 rounded-2xl p-6 text-center";
+                    resultBox.innerHTML = `<h3 class="text-xl font-bold text-slate-800">${student.name}</h3><p class="text-slate-600 text-sm">Anda dinyatakan <strong class="text-red-600">TIDAK LULUS</strong>.</p>`;
+                }
+            } else {
+                resultBox.className = "bg-amber-50 border-2 border-amber-400 rounded-2xl p-6 text-center";
+                resultBox.innerHTML = `<p class="text-amber-800 text-sm">Nomor <strong class="font-mono text-slate-900">${inputVal}</strong> tidak ditemukan.</p>`;
+            }
+        }
+
+        // GENERATOR UNDANGAN CETAK PDF DENGAN DESAIN DUA LOGO RESMI (KIRI & KANAN)
+        function downloadPDF(name, reg) {
+            const { jsPDF } = window.jspdf; 
+            const doc = new jsPDF();
+
+            // 1. Sematkan Logo Provinsi (Sisi Kiri Atas: X=15, Y=12, Lebar=18, Tinggi=18)
+            if (logoProv && logoProv.startsWith("data:image")) {
+                try { doc.addImage(logoProv, 'PNG', 15, 12, 18, 18); } catch (e) { console.error(e); }
+            }
+
+            // 2. Sematkan Logo Sekolah (Sisi Kanan Atas: X=177, Y=12, Lebar=18, Tinggi=18)
+            if (logoSekolah && logoSekolah.startsWith("data:image")) {
+                try { doc.addImage(logoSekolah, 'PNG', 177, 12, 18, 18); } catch (e) { console.error(e); }
+            }
+
+            // Teks Tengah Kop Surat (Diposisikan tepat di tengah-tengah antara logo kiri dan kanan, Koordinat X=105)
+            doc.setFont("times", "bold"); 
+            doc.setFontSize(11);
+            
+            // Proses Baris 1 Instansi (Mendukung pemisah baris \n jika diinput panjang)
+            const lines1 = kopLetter.line1.toUpperCase().split('\n');
+            let currentY = 16;
+            lines1.forEach(line => {
+                doc.text(line, 105, currentY, { align: "center" });
+                currentY += 5;
+            });
+
+            // Proses Baris 2 Nama Sekolah (Dibuat lebih besar)
+            doc.setFontSize(14); 
+            doc.text(kopLetter.line2.toUpperCase(), 105, currentY, { align: "center" });
+            
+            // Proses Baris 3 Alamat
+            currentY += 5;
+            doc.setFont("times", "italic"); doc.setFontSize(8); 
+            doc.text(kopLetter.line3, 105, currentY, { align: "center", maxWidth: 140 });
+            
+            // Garis Pembatas Kop Surat Resmi Kembar (Garis Tebal - Tipis)
+            doc.setLineWidth(0.4); doc.line(15, 38, 195, 38); 
+            doc.setLineWidth(1.2); doc.line(15, 39.5, 195, 39.5);
+            
+            // Konten Surat Resmi PPDB
+            doc.setFont("times", "normal"); doc.setFontSize(11);
+            doc.text("Nomor  : 421/    /SMAN 2 MSJ/Disdik.SS/VI/2026", 15, 49); 
+            doc.text("Hal       : Undangan Pendaftaran Ulang Siswa Baru", 15, 55);
+            doc.text("Kepada Yth. Sdr/i. " + name, 15, 72); 
+            doc.setFont("times", "bold"); doc.text(`No. Pendaftaran: ${reg}`, 15, 78);
+            doc.setFont("times", "normal"); doc.text("Dengan hormat, Sehubungan dengan selesainya proses seleksi administrasi dan akademik Sistem Penerimaan Murid Baru(SPMB) SMA Negeri 2 Mesuji, dengan ini kami sampaikan bahwa Anda dinyatakan 'LULUS', Oleh karena itu, kami mengundang Anda untuk melakukan proses Pendaftaran Ulang yang akan dilaksanakan pada:", 15, 90, { maxWidth: 180 });
+            doc.text("Hari/Tanggal : Senin - Jum'at, 8 - 12 Juni 2026\nWaktu            : 08.00 - 12.00 WIB\nTempat          : Aula SMAN 2 Mesuji", 25, 115);
+            doc.text("Harap membawa berkas yang sudah ditetapkan panitia SPMB berupa, fotocopy Ijazah SD, Foto 3X4 latar merah, Kartu Keluarga, Rapor semester 1-5. Demikian undangan ini kami sampaikan, atas perhatiannya kami ucapkan terimakasih", 15, 135, { maxWidth: 180 });
+            doc.text("Mesuji,    Juni 2026\nSMA Negeri 2 Mesuji,\n\n\nPanitia SPMB SMAN 2 Mesuji", 140, 155);
+            
+            doc.save(`Undangan_PPDB_${name.replace(/ /g, "_")}.pdf`);
+        }
+    </script>
+</body>
+</html>
